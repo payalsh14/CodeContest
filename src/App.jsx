@@ -132,10 +132,13 @@ const INITIAL_PROBLEMS = [
 ];
 
 export default function App() {
-  // Student registration state
+  // Registration state
   const [studentProfile, setStudentProfile] = useState(null);
   const [regName, setRegName] = useState('');
   const [regRoll, setRegRoll] = useState('');
+
+  // Judge authentication state
+  const [isJudgeAuthenticated, setIsJudgeAuthenticated] = useState(false);
 
   const [activeTab, setActiveTab] = useState('student');
   const [activeProblem, setActiveProblem] = useState(INITIAL_PROBLEMS[0]);
@@ -174,6 +177,20 @@ export default function App() {
         name: regName.trim(),
         roll: regRoll.trim()
       });
+    }
+  };
+
+  const handleTabSwitch = (tab) => {
+    if (tab === 'judge' && !isJudgeAuthenticated) {
+      const passcode = prompt("Enter Judge Passcode:");
+      if (passcode === "admin123") {
+        setIsJudgeAuthenticated(true);
+        setActiveTab('judge');
+      } else if (passcode !== null) {
+        alert("Incorrect Judge Passcode!");
+      }
+    } else {
+      setActiveTab(tab);
     }
   };
 
@@ -243,15 +260,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans flex flex-col">
-      {/* Registration Modal overlay if student is not registered */}
+      {/* Student Registration Modal */}
       {!studentProfile && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-6 z-50">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 z-50">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
             <div className="flex items-center space-x-3 mb-4">
               <UserCheck className="w-8 h-8 text-blue-500" />
               <div>
                 <h2 className="text-xl font-bold text-white">Student Registration</h2>
-                <p className="text-xs text-gray-400">Enter your details to join the contest arena</p>
+                <p className="text-xs text-gray-400">Enter your details to enter the contest</p>
               </div>
             </div>
 
@@ -305,7 +322,7 @@ export default function App() {
             </h1>
             {studentProfile && (
               <p className="text-[11px] text-gray-400">
-                Logged in as: <span className="text-blue-400 font-semibold">{studentProfile.name}</span> ({studentProfile.roll})
+                Student: <span className="text-blue-400 font-semibold">{studentProfile.name}</span> ({studentProfile.roll})
               </p>
             )}
           </div>
@@ -319,7 +336,7 @@ export default function App() {
 
           <div className="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
             <button
-              onClick={() => setActiveTab('student')}
+              onClick={() => handleTabSwitch('student')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${
                 activeTab === 'student' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
               }`}
@@ -327,7 +344,7 @@ export default function App() {
               Student Workspace
             </button>
             <button
-              onClick={() => setActiveTab('judge')}
+              onClick={() => handleTabSwitch('judge')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition flex items-center space-x-1 ${
                 activeTab === 'judge' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
               }`}
@@ -339,7 +356,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Student Workspace */}
+      {/* Student Workspace */}
       {activeTab === 'student' && (
         <div className="flex-1 grid grid-cols-12 overflow-hidden">
           <div className="col-span-3 border-r border-gray-800 bg-gray-900/50 p-4 overflow-y-auto">
