@@ -378,4 +378,291 @@ output_val
               </div>
 
               <div>
-                <label className="block text-xs font-
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Roll Number / Student ID</label>
+                <input
+                  type="text"
+                  required
+                  value={regRoll}
+                  onChange={(e) => setRegRoll(e.target.value)}
+                  placeholder="e.g. 21CS042"
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full mt-2 bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg text-sm transition"
+              >
+                Enter Contest
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-gray-900 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Code className="text-blue-500 w-6 h-6" />
+          <div>
+            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              Coding Contest Arena
+            </h1>
+            {studentProfile && (
+              <p className="text-[11px] text-gray-400">
+                Student: <span className="text-blue-400 font-semibold">{studentProfile.name}</span> ({studentProfile.roll})
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-6">
+          <div className="text-xs px-3 py-1 rounded-full border bg-gray-950 flex items-center space-x-2">
+            {isPyodideLoading ? (
+              <>
+                <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />
+                <span className="text-amber-400">Compiler Loading...</span>
+              </>
+            ) : pyodideReady ? (
+              <>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-400 font-medium">Python 3.11 WASM Ready</span>
+              </>
+            ) : (
+              <span className="text-gray-500">Offline</span>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-2 px-4 py-1.5 rounded-lg border border-gray-700 bg-gray-800 text-amber-400 font-mono font-bold">
+            <Clock className="w-4 h-4 animate-pulse" />
+            <span>{formatTime(timeLeft)}</span>
+          </div>
+
+          <div className="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
+            <button
+              onClick={() => handleTabSwitch('student')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${
+                activeTab === 'student' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Student Workspace
+            </button>
+            <button
+              onClick={() => handleTabSwitch('judge')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition flex items-center space-x-1 ${
+                activeTab === 'judge' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Award className="w-4 h-4 mr-1" />
+              Judge Portal
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Workspace */}
+      {activeTab === 'student' && (
+        <div className="flex-1 grid grid-cols-12 overflow-hidden">
+          <div className="col-span-3 border-r border-gray-800 bg-gray-900/50 p-4 overflow-y-auto">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Problems (5)</h2>
+            <div className="space-y-2">
+              {INITIAL_PROBLEMS.map((prob) => (
+                <button
+                  key={prob.id}
+                  onClick={() => handleProblemChange(prob)}
+                  className={`w-full text-left p-3 rounded-xl border transition ${
+                    activeProblem.id === prob.id
+                      ? 'bg-blue-600/10 border-blue-500 text-white'
+                      : 'bg-gray-800/40 border-gray-800 text-gray-300 hover:bg-gray-800/80'
+                  }`}
+                >
+                  <div className="text-sm font-medium line-clamp-1">{prob.id}. {prob.title}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="col-span-4 border-r border-gray-800 p-6 overflow-y-auto bg-gray-900/20">
+            <h2 className="text-2xl font-bold text-white mb-2">{activeProblem.title}</h2>
+            <p className="text-sm text-gray-300 leading-relaxed mb-4">{activeProblem.description}</p>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sample Examples</h3>
+            {activeProblem.examples.map((ex, idx) => (
+              <div key={idx} className="bg-gray-800/60 p-3 rounded-lg border border-gray-700/50 font-mono text-xs mb-2">
+                <div><span className="text-gray-400">Input:</span> {ex.input}</div>
+                <div><span className="text-gray-400">Expected Output:</span> {ex.output}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="col-span-5 flex flex-col bg-gray-950">
+            <div className="p-3 border-b border-gray-800 bg-gray-900 flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => handleLanguageChange(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 text-white text-xs rounded px-2.5 py-1"
+                >
+                  <option value="python">Python</option>
+                  <option value="cpp">C++</option>
+                </select>
+
+                <button
+                  onClick={handleResetCode}
+                  title="Reset to blank template"
+                  className="p-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded transition"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleTestCode}
+                  disabled={isExecuting}
+                  className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/30 rounded text-xs font-medium flex items-center space-x-1"
+                >
+                  {isExecuting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+                  <span>Run Code</span>
+                </button>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={isExecuting}
+                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded text-xs font-medium flex items-center space-x-1 text-white"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Submit</span>
+                </button>
+              </div>
+            </div>
+
+            <textarea
+              value={currentCode}
+              onChange={(e) => handleCodeChange(e.target.value)}
+              className="flex-1 bg-gray-950 p-4 font-mono text-sm text-gray-200 focus:outline-none resize-none"
+              placeholder="Write complete code from scratch..."
+            />
+
+            {/* Input & Output Terminal */}
+            <div className="h-56 border-t border-gray-800 bg-gray-900/90 flex flex-col">
+              <div className="grid grid-cols-2 flex-1 divide-x divide-gray-800">
+                {/* Input Textarea */}
+                <div className="p-3 flex flex-col">
+                  <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
+                    <Sliders className="w-3 h-3 text-blue-400" />
+                    <span>Input (stdin)</span>
+                  </label>
+                  <textarea
+                    value={customInputText}
+                    onChange={(e) => setCustomInputText(e.target.value)}
+                    placeholder="Enter input here..."
+                    className="flex-1 w-full bg-gray-950 border border-gray-800 rounded p-2 font-mono text-xs text-gray-200 focus:outline-none focus:border-blue-500 resize-none"
+                  />
+                </div>
+
+                {/* Output Terminal */}
+                <div className="p-3 flex flex-col">
+                  <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
+                    <Terminal className="w-3 h-3 text-emerald-400" />
+                    <span>Compiler Output (stdout)</span>
+                  </label>
+                  <pre className="flex-1 w-full bg-gray-950 border border-gray-800 rounded p-2 font-mono text-xs text-emerald-400 overflow-y-auto whitespace-pre-wrap">
+                    {consoleOutput || "Click 'Run Code' to test your code output..."}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Submission Result Status */}
+              {submissionResult && (
+                <div className="border-t border-gray-800 px-4 py-2 bg-gray-950 flex justify-between items-center">
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded border ${
+                    submissionResult.status === "Accepted"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-red-500/10 text-red-400 border-red-500/20"
+                  }`}>
+                    Submission: {submissionResult.status}
+                  </span>
+                  <span className="text-xs text-gray-400 font-mono">
+                    Passed {submissionResult.passed}/{submissionResult.total} test cases
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Judge Portal */}
+      {activeTab === 'judge' && (
+        <div className="flex-1 p-8 max-w-5xl mx-auto w-full">
+          <h2 className="text-2xl font-bold text-white mb-4">Judge Portal - Live Submissions</h2>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-800/60 text-gray-400 text-xs uppercase">
+                <tr>
+                  <th className="p-4">Submission ID</th>
+                  <th className="p-4">Student Name</th>
+                  <th className="p-4">Roll / ID</th>
+                  <th className="p-4">Problem</th>
+                  <th className="p-4">Lang</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {submissions.length === 0 ? (
+                  <tr><td colSpan="7" className="p-4 text-center text-gray-500">No submissions yet</td></tr>
+                ) : (
+                  submissions.map((sub) => (
+                    <tr key={sub.id}>
+                      <td className="p-4 font-mono text-xs text-gray-400">{sub.id}</td>
+                      <td className="p-4 font-medium text-white">{sub.studentName}</td>
+                      <td className="p-4 font-mono text-xs text-blue-400">{sub.studentId}</td>
+                      <td className="p-4 text-xs">{sub.problemTitle}</td>
+                      <td className="p-4 font-mono text-xs uppercase text-blue-400">{sub.language}</td>
+                      <td className="p-4">
+                        <span className={`text-xs px-2 py-0.5 rounded border ${
+                          sub.status === "Accepted" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
+                        }`}>
+                          {sub.status}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => setSelectedSubmissionModal(sub)}
+                          className="px-3 py-1 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white border border-blue-500/30 rounded text-xs"
+                        >
+                          Inspect Code
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Code Inspector Modal */}
+      {selectedSubmissionModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-6 z-50">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-2xl p-4">
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <h3 className="text-base font-bold text-white">
+                  Submitted Code by {selectedSubmissionModal.studentName} ({selectedSubmissionModal.studentId})
+                </h3>
+                <p className="text-xs text-gray-400">Language: {selectedSubmissionModal.language.toUpperCase()}</p>
+              </div>
+              <button onClick={() => setSelectedSubmissionModal(null)} className="text-gray-400">✕</button>
+            </div>
+            <pre className="bg-gray-950 p-4 rounded text-xs font-mono text-gray-200 overflow-x-auto max-h-96">
+              {selectedSubmissionModal.code}
+            </pre>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
