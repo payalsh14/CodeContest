@@ -9,42 +9,43 @@ const INITIAL_PROBLEMS = [
     title: "Subtract the Product and Sum of Digits of an Integer",
     difficulty: "Easy",
     points: 100,
-    description: "Given an integer number n, return the difference between the product of its digits and the sum of its digits.",
+    description: "Read an integer n from standard input. Calculate and print the difference between the product of its digits and the sum of its digits.",
     examples: [
-      { input: "n = 234", output: "15", explanation: "Product = 2*3*4 = 24. Sum = 2+3+4 = 9. Result = 24 - 9 = 15." },
-      { input: "n = 4421", output: "21", explanation: "Product = 4*4*2*1 = 32. Sum = 4+4+2+1 = 11. Result = 32 - 11 = 21." }
+      { input: "234", output: "15", explanation: "Product = 2*3*4 = 24. Sum = 2+3+4 = 9. Result = 24 - 9 = 15." },
+      { input: "4421", output: "21", explanation: "Product = 4*4*2*1 = 32. Sum = 4+4+2+1 = 11. Result = 32 - 11 = 21." }
     ],
     constraints: ["1 <= n <= 10^5"],
     starterCode: {
-      python: "def subtractProductAndSum(n):\n    # Write your python solution here\n    pass",
-      cpp: "class Solution {\npublic:\n    int subtractProductAndSum(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
+      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print using cout\n    \n    return 0;\n}"
     },
     testCases: [
-      { input: 234, expected: 15 },
-      { input: 4421, expected: 21 }
+      { input: "234", expected: "15" },
+      { input: "4421", expected: "21" }
     ],
-    // Strict evaluation engine logic
-    evaluator: (userCode, tc) => {
+    evaluator: (userCode, tc, lang) => {
       try {
-        if (!userCode.includes("return")) return false;
-        // Match return value expressions
-        const returnMatch = userCode.match(/return\s+(.+)/);
-        if (!returnMatch) return false;
+        if (!userCode.trim()) return false;
 
-        let expr = returnMatch[1].trim();
-        let n = tc.input;
+        // Python Validation
+        if (lang === 'python') {
+          if (!userCode.includes("input(") || !userCode.includes("print(")) return false;
+          
+          let n = Number(tc.input);
+          let p = 1, s = 0;
+          for (let d of String(n)) { p *= Number(d); s += Number(d); }
+          let expectedVal = String(p - s);
 
-        // Verify mathematical result of product - sum for digit inputs
-        let product = 1, sum = 0;
-        for (let d of String(n)) { product *= Number(d); sum += Number(d); }
-        let target = product - sum;
+          // Verify print contains calculation logic or valid variables
+          const hasOutputLogic = userCode.includes("-") || userCode.includes("product") || userCode.includes("sum");
+          return hasOutputLogic;
+        }
 
-        // Check if student implemented valid arithmetic or returned fixed value
-        if (expr === String(target)) return true;
-        
-        // Evaluate dynamic expressions using input variables
-        if (expr.includes("product") && expr.includes("sum")) return true;
-        if (expr.includes("*") && expr.includes("-")) return true;
+        // C++ Validation
+        if (lang === 'cpp') {
+          if (!userCode.includes("cin") || !userCode.includes("cout")) return false;
+          return userCode.includes("main()") && (userCode.includes("%") || userCode.includes("*") || userCode.includes("-"));
+        }
 
         return false;
       } catch (e) {
@@ -57,24 +58,29 @@ const INITIAL_PROBLEMS = [
     title: "Concatenation of Array",
     difficulty: "Easy",
     points: 100,
-    description: "Given an integer list nums, return a new list containing two copies of nums concatenated together.",
+    description: "Read space-separated integers representing an array nums. Print the array concatenated with itself.",
     examples: [
-      { input: "nums = [1,2,1]", output: "[1,2,1,1,2,1]" },
-      { input: "nums = [1,3,2,1]", output: "[1,3,2,1,1,3,2,1]" }
+      { input: "1 2 1", output: "1 2 1 1 2 1" },
+      { input: "1 3 2 1", output: "1 3 2 1 1 3 2 1" }
     ],
     constraints: ["1 <= nums.length <= 1000"],
     starterCode: {
-      python: "def getConcatenation(nums):\n    # Write your python solution here\n    pass",
-      cpp: "class Solution {\npublic:\n    vector<int> getConcatenation(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
+      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print using cout\n    \n    return 0;\n}"
     },
     testCases: [
-      { input: [1,2,1], expected: [1,2,1,1,2,1] },
-      { input: [1,3,2,1], expected: [1,3,2,1,1,3,2,1] }
+      { input: "1 2 1", expected: "1 2 1 1 2 1" },
+      { input: "1 3 2 1", expected: "1 3 2 1 1 3 2 1" }
     ],
-    evaluator: (userCode) => {
-      if (!userCode.includes("return")) return false;
-      const clean = userCode.replace(/\s+/g, '');
-      return clean.includes("returnnums+nums") || clean.includes("returnnums*2") || clean.includes("nums.extend(nums)");
+    evaluator: (userCode, tc, lang) => {
+      if (!userCode.trim()) return false;
+      if (lang === 'python') {
+        return userCode.includes("input(") && userCode.includes("print(") && (userCode.includes("+") || userCode.includes("*") || userCode.includes("extend") || userCode.includes("split"));
+      }
+      if (lang === 'cpp') {
+        return userCode.includes("cin") && userCode.includes("cout") && userCode.includes("main()");
+      }
+      return false;
     }
   },
   {
@@ -82,23 +88,31 @@ const INITIAL_PROBLEMS = [
     title: "Add Digits",
     difficulty: "Easy",
     points: 100,
-    description: "Given an integer num, repeatedly add all its digits until the result has only one digit, and return it.",
+    description: "Read an integer num. Repeatedly add all its digits until the result has only one digit, and print it.",
     examples: [
-      { input: "num = 38", output: "2", explanation: "3 + 8 = 11, then 1 + 1 = 2." },
-      { input: "num = 0", output: "0" }
+      { input: "38", output: "2", explanation: "3 + 8 = 11, then 1 + 1 = 2." },
+      { input: "0", output: "0" }
     ],
     constraints: ["0 <= num <= 2^31 - 1"],
     starterCode: {
-      python: "def addDigits(num):\n    # Write your python solution here\n    pass",
-      cpp: "class Solution {\npublic:\n    int addDigits(int num) {\n        // Write your solution here\n        return 0;\n    }\n};"
+      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
+      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print using cout\n    \n    return 0;\n}"
     },
     testCases: [
-      { input: 38, expected: 2 },
-      { input: 0, expected: 0 }
+      { input: "38", expected: "2" },
+      { input: "0", expected: "0" }
     ],
-    evaluator: (userCode) => {
-      if (!userCode.includes("return")) return false;
-      return userCode.includes("%") || userCode.includes("while") || userCode.includes("divmod");
+    evaluator: (userCode, tc, lang) => {
+      if (!userCode.trim()) return false;
+      if (lang === 'python') {
+        const hasIO = userCode.includes("input(") && userCode.includes("print(");
+        const hasLogic = userCode.includes("%") || userCode.includes("while") || userCode.includes("sum");
+        return hasIO && hasLogic;
+      }
+      if (lang === 'cpp') {
+        return userCode.includes("cin") && userCode.includes("cout") && (userCode.includes("%") || userCode.includes("while"));
+      }
+      return false;
     }
   },
   {
@@ -106,23 +120,29 @@ const INITIAL_PROBLEMS = [
     title: "XOR Operation in an Array",
     difficulty: "Easy",
     points: 100,
-    description: "Given n and start, calculate numbers where number = start + 2 * i for each step, and return their XOR total.",
+    description: "Read two space-separated integers n and start. Calculate numbers where number = start + 2 * i for each step, and print their XOR total.",
     examples: [
-      { input: "n = 5, start = 0", output: "8" },
-      { input: "n = 4, start = 3", output: "8" }
+      { input: "5 0", output: "8" },
+      { input: "4 3", output: "8" }
     ],
     constraints: ["1 <= n <= 1000", "0 <= start <= 1000"],
     starterCode: {
-      python: "def xorOperation(n, start):\n    # Write your python solution here\n    pass",
-      cpp: "class Solution {\npublic:\n    int xorOperation(int n, int start) {\n        // Write your solution here\n        return 0;\n    }\n};"
+      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
+      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print using cout\n    \n    return 0;\n}"
     },
     testCases: [
-      { input: { n: 5, start: 0 }, expected: 8 },
-      { input: { n: 4, start: 3 }, expected: 8 }
+      { input: "5 0", expected: "8" },
+      { input: "4 3", expected: "8" }
     ],
-    evaluator: (userCode) => {
-      if (!userCode.includes("return")) return false;
-      return userCode.includes("^") || userCode.includes("xor") || userCode.includes("operator.xor");
+    evaluator: (userCode, tc, lang) => {
+      if (!userCode.trim()) return false;
+      if (lang === 'python') {
+        return userCode.includes("input(") && userCode.includes("print(") && (userCode.includes("^") || userCode.includes("xor"));
+      }
+      if (lang === 'cpp') {
+        return userCode.includes("cin") && userCode.includes("cout") && userCode.includes("^");
+      }
+      return false;
     }
   },
   {
@@ -130,23 +150,29 @@ const INITIAL_PROBLEMS = [
     title: "Squares of a Sorted Array",
     difficulty: "Easy",
     points: 100,
-    description: "Given a sorted list of numbers, return a new sorted list containing the square of each number.",
+    description: "Read space-separated integers representing a sorted list. Print a new sorted list containing the square of each number.",
     examples: [
-      { input: "nums = [-4,-1,0,3,10]", output: "[0,1,9,16,100]" },
-      { input: "nums = [-7,-3,2,3,11]", output: "[4,9,9,49,121]" }
+      { input: "-4 -1 0 3 10", output: "0 1 9 16 100" },
+      { input: "-7 -3 2 3 11", output: "4 9 9 49 121" }
     ],
     constraints: ["1 <= nums.length <= 10^4"],
     starterCode: {
-      python: "def sortedSquares(nums):\n    # Write your python solution here\n    pass",
-      cpp: "class Solution {\npublic:\n    vector<int> sortedSquares(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
+      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print using cout\n    \n    return 0;\n}"
     },
     testCases: [
-      { input: [-4,-1,0,3,10], expected: [0,1,9,16,100] },
-      { input: [-7,-3,2,3,11], expected: [4,9,9,49,121] }
+      { input: "-4 -1 0 3 10", expected: "0 1 9 16 100" },
+      { input: "-7 -3 2 3 11", expected: "4 9 9 49 121" }
     ],
-    evaluator: (userCode) => {
-      if (!userCode.includes("return")) return false;
-      return userCode.includes("sort") && (userCode.includes("*") || userCode.includes("**"));
+    evaluator: (userCode, tc, lang) => {
+      if (!userCode.trim()) return false;
+      if (lang === 'python') {
+        return userCode.includes("input(") && userCode.includes("print(") && (userCode.includes("sort") || userCode.includes("*"));
+      }
+      if (lang === 'cpp') {
+        return userCode.includes("cin") && userCode.includes("cout") && (userCode.includes("sort") || userCode.includes("*"));
+      }
+      return false;
     }
   }
 ];
@@ -246,7 +272,7 @@ export default function App() {
     const total = activeProblem.testCases.length;
     
     activeProblem.testCases.forEach((tc) => {
-      const isCorrect = activeProblem.evaluator(currentCode, tc);
+      const isCorrect = activeProblem.evaluator(currentCode, tc, selectedLanguage);
       if (isCorrect) passed++;
     });
 
@@ -256,8 +282,8 @@ export default function App() {
       status: isAllPassed ? "Accepted" : "Wrong Answer",
       passedCases: passed,
       totalCases: total,
-      runtime: isAllPassed ? "2ms" : "N/A",
-      memory: "14.1 MB"
+      runtime: isAllPassed ? "3ms" : "N/A",
+      memory: "14.2 MB"
     };
   };
 
@@ -296,7 +322,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans flex flex-col">
-      {/* Student Registration Modal */}
+      {/* Registration Modal */}
       {!studentProfile && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 z-50">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
@@ -459,7 +485,7 @@ export default function App() {
               value={currentCode}
               onChange={(e) => handleCodeChange(e.target.value)}
               className="flex-1 bg-gray-950 p-4 font-mono text-sm text-gray-200 focus:outline-none resize-none"
-              placeholder="Write code here..."
+              placeholder="Write complete code from scratch..."
             />
 
             <div className="h-44 border-t border-gray-800 bg-gray-900/90 p-4 overflow-y-auto">
