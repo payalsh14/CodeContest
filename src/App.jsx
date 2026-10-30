@@ -16,8 +16,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= n <= 10^5"],
     starterCode: {
-      python: "def subtractProductAndSum(n):\n    # Write your python solution here\n    product = 1\n    total_sum = 0\n    \n    # Loop through each digit in the number\n    for digit in str(n):\n        product = product * int(digit)\n        total_sum = total_sum + int(digit)\n        \n    return product - total_sum",
-      cpp: "class Solution {\npublic:\n    int subtractProductAndSum(int n) {\n        int p = 1, s = 0;\n        while(n > 0) {\n            int d = n % 10;\n            p *= d;\n            s += d;\n            n /= 10;\n        }\n        return p - s;\n    }\n};"
+      python: "def subtractProductAndSum(n):\n    # Write your python solution here\n    pass",
+      cpp: "class Solution {\npublic:\n    int subtractProductAndSum(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
     },
     testCases: [
       { input: 234, expected: 15 },
@@ -49,8 +49,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= nums.length <= 1000"],
     starterCode: {
-      python: "def getConcatenation(nums):\n    # Simply join the list with itself\n    return nums + nums",
-      cpp: "class Solution {\npublic:\n    vector<int> getConcatenation(vector<int>& nums) {\n        vector<int> ans = nums;\n        ans.insert(ans.end(), nums.begin(), nums.end());\n        return ans;\n    }\n};"
+      python: "def getConcatenation(nums):\n    # Write your python solution here\n    pass",
+      cpp: "class Solution {\npublic:\n    vector<int> getConcatenation(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
     },
     testCases: [
       { input: [1,2,1], expected: [1,2,1,1,2,1] },
@@ -72,8 +72,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["0 <= num <= 2^31 - 1"],
     starterCode: {
-      python: "def addDigits(num):\n    # Keep adding digits while num is greater than 9\n    while num > 9:\n        total = 0\n        for digit in str(num):\n            total = total + int(digit)\n        num = total\n    return num",
-      cpp: "class Solution {\npublic:\n    int addDigits(int num) {\n        while (num > 9) {\n            int sum = 0;\n            while (num > 0) {\n                sum += num % 10;\n                num /= 10;\n            }\n            num = sum;\n        }\n        return num;\n    }\n};"
+      python: "def addDigits(num):\n    # Write your python solution here\n    pass",
+      cpp: "class Solution {\npublic:\n    int addDigits(int num) {\n        // Write your solution here\n        return 0;\n    }\n};"
     },
     testCases: [
       { input: 38, expected: 2 },
@@ -95,8 +95,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= n <= 1000", "0 <= start <= 1000"],
     starterCode: {
-      python: "def xorOperation(n, start):\n    result = 0\n    for i in range(n):\n        number = start + 2 * i\n        result = result ^ number\n    return result",
-      cpp: "class Solution {\npublic:\n    int xorOperation(int n, int start) {\n        int res = 0;\n        for(int i=0; i<n; i++) res ^= (start + 2*i);\n        return res;\n    }\n};"
+      python: "def xorOperation(n, start):\n    # Write your python solution here\n    pass",
+      cpp: "class Solution {\npublic:\n    int xorOperation(int n, int start) {\n        // Write your solution here\n        return 0;\n    }\n};"
     },
     testCases: [
       { input: { n: 5, start: 0 }, expected: 8 },
@@ -118,8 +118,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= nums.length <= 10^4"],
     starterCode: {
-      python: "def sortedSquares(nums):\n    result = []\n    for x in nums:\n        result.append(x * x)\n    result.sort()\n    return result",
-      cpp: "class Solution {\npublic:\n    vector<int> sortedSquares(vector<int>& nums) {\n        for(int &x : nums) x *= x;\n        sort(nums.begin(), nums.end());\n        return nums;\n    }\n};"
+      python: "def sortedSquares(nums):\n    # Write your python solution here\n    pass",
+      cpp: "class Solution {\npublic:\n    vector<int> sortedSquares(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
     },
     testCases: [
       { input: [-4,-1,0,3,10], expected: [0,1,9,16,100] },
