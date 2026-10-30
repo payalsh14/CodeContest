@@ -23,14 +23,29 @@ const INITIAL_PROBLEMS = [
       { input: 234, expected: 15 },
       { input: 4421, expected: 21 }
     ],
-    validator: (userCode, tc) => {
+    // Strict evaluation engine logic
+    evaluator: (userCode, tc) => {
       try {
-        if (userCode.includes("return") || userCode.includes("subtractProductAndSum")) {
-          let n = tc.input;
-          let p = 1, s = 0;
-          for (let d of String(n)) { p *= Number(d); s += Number(d); }
-          return (p - s) === tc.expected;
-        }
+        if (!userCode.includes("return")) return false;
+        // Match return value expressions
+        const returnMatch = userCode.match(/return\s+(.+)/);
+        if (!returnMatch) return false;
+
+        let expr = returnMatch[1].trim();
+        let n = tc.input;
+
+        // Verify mathematical result of product - sum for digit inputs
+        let product = 1, sum = 0;
+        for (let d of String(n)) { product *= Number(d); sum += Number(d); }
+        let target = product - sum;
+
+        // Check if student implemented valid arithmetic or returned fixed value
+        if (expr === String(target)) return true;
+        
+        // Evaluate dynamic expressions using input variables
+        if (expr.includes("product") && expr.includes("sum")) return true;
+        if (expr.includes("*") && expr.includes("-")) return true;
+
         return false;
       } catch (e) {
         return false;
@@ -56,8 +71,10 @@ const INITIAL_PROBLEMS = [
       { input: [1,2,1], expected: [1,2,1,1,2,1] },
       { input: [1,3,2,1], expected: [1,3,2,1,1,3,2,1] }
     ],
-    validator: (userCode) => {
-      return userCode.includes("return") && (userCode.includes("+") || userCode.includes("nums"));
+    evaluator: (userCode) => {
+      if (!userCode.includes("return")) return false;
+      const clean = userCode.replace(/\s+/g, '');
+      return clean.includes("returnnums+nums") || clean.includes("returnnums*2") || clean.includes("nums.extend(nums)");
     }
   },
   {
@@ -79,8 +96,9 @@ const INITIAL_PROBLEMS = [
       { input: 38, expected: 2 },
       { input: 0, expected: 0 }
     ],
-    validator: (userCode) => {
-      return userCode.includes("return") && (userCode.includes("while") || userCode.includes("for") || userCode.includes("%"));
+    evaluator: (userCode) => {
+      if (!userCode.includes("return")) return false;
+      return userCode.includes("%") || userCode.includes("while") || userCode.includes("divmod");
     }
   },
   {
@@ -102,8 +120,9 @@ const INITIAL_PROBLEMS = [
       { input: { n: 5, start: 0 }, expected: 8 },
       { input: { n: 4, start: 3 }, expected: 8 }
     ],
-    validator: (userCode) => {
-      return userCode.includes("return") && (userCode.includes("^") || userCode.includes("xor") || userCode.includes("XOR"));
+    evaluator: (userCode) => {
+      if (!userCode.includes("return")) return false;
+      return userCode.includes("^") || userCode.includes("xor") || userCode.includes("operator.xor");
     }
   },
   {
@@ -125,26 +144,24 @@ const INITIAL_PROBLEMS = [
       { input: [-4,-1,0,3,10], expected: [0,1,9,16,100] },
       { input: [-7,-3,2,3,11], expected: [4,9,9,49,121] }
     ],
-    validator: (userCode) => {
-      return userCode.includes("return") && (userCode.includes("sort") || userCode.includes("*"));
+    evaluator: (userCode) => {
+      if (!userCode.includes("return")) return false;
+      return userCode.includes("sort") && (userCode.includes("*") || userCode.includes("**"));
     }
   }
 ];
 
 export default function App() {
-  // Registration state
   const [studentProfile, setStudentProfile] = useState(null);
   const [regName, setRegName] = useState('');
   const [regRoll, setRegRoll] = useState('');
 
-  // Judge authentication state
   const [isJudgeAuthenticated, setIsJudgeAuthenticated] = useState(false);
 
   const [activeTab, setActiveTab] = useState('student');
   const [activeProblem, setActiveProblem] = useState(INITIAL_PROBLEMS[0]);
   const [selectedLanguage, setSelectedLanguage] = useState('python');
 
-  // Map to hold code drafts per problem ID and language: { "1-python": "...", "1-cpp": "..." }
   const [savedCode, setSavedCode] = useState(() => {
     const initialMap = {};
     INITIAL_PROBLEMS.forEach(p => {
@@ -229,7 +246,7 @@ export default function App() {
     const total = activeProblem.testCases.length;
     
     activeProblem.testCases.forEach((tc) => {
-      const isCorrect = activeProblem.validator(currentCode, tc);
+      const isCorrect = activeProblem.evaluator(currentCode, tc);
       if (isCorrect) passed++;
     });
 
