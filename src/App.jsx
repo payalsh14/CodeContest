@@ -3,6 +3,9 @@ import {
   Play, Send, Clock, Award, Code, UserCheck, Sliders, Loader2, Terminal, RotateCcw
 } from 'lucide-react';
 
+const BLANK_PYTHON_STARTER = "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n";
+const BLANK_CPP_STARTER = "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print output using cout\n    \n    return 0;\n}";
+
 const INITIAL_PROBLEMS = [
   {
     id: 1,
@@ -16,8 +19,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= n <= 10^5"],
     starterCode: {
-      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
-      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print output using cout\n    \n    return 0;\n}"
+      python: BLANK_PYTHON_STARTER,
+      cpp: BLANK_CPP_STARTER
     },
     testCases: [
       { input: "234", expected: "15" },
@@ -36,8 +39,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= nums.length <= 1000"],
     starterCode: {
-      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
-      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print output using cout\n    \n    return 0;\n}"
+      python: BLANK_PYTHON_STARTER,
+      cpp: BLANK_CPP_STARTER
     },
     testCases: [
       { input: "1 2 1", expected: "1 2 1 1 2 1" },
@@ -56,8 +59,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["0 <= num <= 2^31 - 1"],
     starterCode: {
-      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
-      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print output using cout\n    \n    return 0;\n}"
+      python: BLANK_PYTHON_STARTER,
+      cpp: BLANK_CPP_STARTER
     },
     testCases: [
       { input: "38", expected: "2" },
@@ -76,8 +79,8 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= n <= 1000", "0 <= start <= 1000"],
     starterCode: {
-      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
-      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print output using cout\n    \n    return 0;\n}"
+      python: BLANK_PYTHON_STARTER,
+      cpp: BLANK_CPP_STARTER
     },
     testCases: [
       { input: "5 0", expected: "8" },
@@ -96,12 +99,12 @@ const INITIAL_PROBLEMS = [
     ],
     constraints: ["1 <= nums.length <= 10^4"],
     starterCode: {
-      python: "# Write your full Python solution from scratch\n# Read input using input() and print result using print()\n\n",
-      cpp: "// Write your full C++ solution from scratch\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input using cin and print output using cout\n    \n    return 0;\n}"
+      python: BLANK_PYTHON_STARTER,
+      cpp: BLANK_CPP_STARTER
     },
     testCases: [
-      { input: "-4 -1 0 3 10", expected: "0 1 9 16 100" },
-      { input: "-7 -3 2 3 11", expected: "4 9 9 49 121" }
+      { input: "-4 -1 0 3 10", output: "0 1 9 16 100" },
+      { input: "-7 -3 2 3 11", output: "4 9 9 49 121" }
     ]
   }
 ];
@@ -167,8 +170,8 @@ export default function App() {
   const [savedCode, setSavedCode] = useState(() => {
     const initialMap = {};
     INITIAL_PROBLEMS.forEach(p => {
-      initialMap[`${p.id}-python`] = p.starterCode.python;
-      initialMap[`${p.id}-cpp`] = p.starterCode.cpp;
+      initialMap[`${p.id}-python`] = BLANK_PYTHON_STARTER;
+      initialMap[`${p.id}-cpp`] = BLANK_CPP_STARTER;
     });
     return initialMap;
   });
@@ -215,7 +218,7 @@ export default function App() {
   };
 
   const currentCodeKey = `${activeProblem.id}-${selectedLanguage}`;
-  const currentCode = savedCode[currentCodeKey] || activeProblem.starterCode[selectedLanguage];
+  const currentCode = savedCode[currentCodeKey] || (selectedLanguage === 'python' ? BLANK_PYTHON_STARTER : BLANK_CPP_STARTER);
 
   const handleCodeChange = (newCode) => {
     setSavedCode(prev => ({
@@ -225,7 +228,7 @@ export default function App() {
   };
 
   const handleResetCode = () => {
-    const defaultTemplate = activeProblem.starterCode[selectedLanguage];
+    const defaultTemplate = selectedLanguage === 'python' ? BLANK_PYTHON_STARTER : BLANK_CPP_STARTER;
     handleCodeChange(defaultTemplate);
     setConsoleOutput('');
   };
@@ -281,7 +284,6 @@ output_val
     }
   };
 
-  // Self-Testing Runner (stdout display)
   const handleTestCode = async () => {
     setIsExecuting(true);
     setConsoleOutput("Compiling & Executing...");
@@ -307,7 +309,6 @@ output_val
     }
   };
 
-  // Official Judge Submission Action
   const handleSubmit = async () => {
     setIsExecuting(true);
     let passed = 0;
@@ -509,9 +510,10 @@ output_val
                 <button
                   onClick={handleResetCode}
                   title="Reset to blank template"
-                  className="p-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded transition"
+                  className="p-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded transition flex items-center space-x-1 px-2 text-xs"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Code</span>
                 </button>
               </div>
 
