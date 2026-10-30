@@ -143,7 +143,17 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('student');
   const [activeProblem, setActiveProblem] = useState(INITIAL_PROBLEMS[0]);
   const [selectedLanguage, setSelectedLanguage] = useState('python');
-  const [code, setCode] = useState(INITIAL_PROBLEMS[0].starterCode.python);
+
+  // Map to hold code drafts per problem ID and language: { "1-python": "...", "1-cpp": "..." }
+  const [savedCode, setSavedCode] = useState(() => {
+    const initialMap = {};
+    INITIAL_PROBLEMS.forEach(p => {
+      initialMap[`${p.id}-python`] = p.starterCode.python;
+      initialMap[`${p.id}-cpp`] = p.starterCode.cpp;
+    });
+    return initialMap;
+  });
+
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionResult, setExecutionResult] = useState(null);
   
@@ -194,14 +204,23 @@ export default function App() {
     }
   };
 
+  const currentCodeKey = `${activeProblem.id}-${selectedLanguage}`;
+  const currentCode = savedCode[currentCodeKey] || activeProblem.starterCode[selectedLanguage];
+
+  const handleCodeChange = (newCode) => {
+    setSavedCode(prev => ({
+      ...prev,
+      [currentCodeKey]: newCode
+    }));
+  };
+
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
-    setCode(activeProblem.starterCode[lang]);
+    setExecutionResult(null);
   };
 
   const handleProblemChange = (prob) => {
     setActiveProblem(prob);
-    setCode(prob.starterCode[selectedLanguage]);
     setExecutionResult(null);
   };
 
@@ -210,7 +229,7 @@ export default function App() {
     const total = activeProblem.testCases.length;
     
     activeProblem.testCases.forEach((tc) => {
-      const isCorrect = activeProblem.validator(code, tc);
+      const isCorrect = activeProblem.validator(currentCode, tc);
       if (isCorrect) passed++;
     });
 
@@ -247,7 +266,7 @@ export default function App() {
         problemId: activeProblem.id,
         problemTitle: activeProblem.title,
         language: selectedLanguage,
-        code: code,
+        code: currentCode,
         status: res.status,
         runtime: res.runtime,
         memory: res.memory,
@@ -420,10 +439,10 @@ export default function App() {
             </div>
 
             <textarea
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              value={currentCode}
+              onChange={(e) => handleCodeChange(e.target.value)}
               className="flex-1 bg-gray-950 p-4 font-mono text-sm text-gray-200 focus:outline-none resize-none"
-              placeholder="Write Python code here..."
+              placeholder="Write code here..."
             />
 
             <div className="h-44 border-t border-gray-800 bg-gray-900/90 p-4 overflow-y-auto">
