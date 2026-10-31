@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Play, Send, Clock, Award, Code, UserCheck, Sliders, Loader2, Terminal, RotateCcw, Users
+  Play, Send, Clock, Award, Code, UserCheck, Sliders, Loader2, Terminal, RotateCcw, Users, AlertCircle
 } from 'lucide-react';
 
 const CONTEST_DURATION_SECONDS = 10800; // 3 Hours
@@ -80,8 +80,19 @@ const INITIAL_PROBLEMS = [
   }
 ];
 
+// String Normalizer to remove extra trailing newlines and spaces
+const normalizeOutput = (str) => {
+  if (!str) return "";
+  return String(str)
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line !== "")
+    .join("\n")
+    .trim();
+};
+
 export default function App() {
-  // Session Persistence via localStorage
   const [studentProfile, setStudentProfile] = useState(() => {
     const saved = localStorage.getItem('contest_active_team');
     return saved ? JSON.parse(saved) : null;
@@ -113,7 +124,6 @@ export default function App() {
   const [submissions, setSubmissions] = useState([]);
   const [selectedSubmissionModal, setSelectedSubmissionModal] = useState(null);
 
-  // Calculate persistent remaining time using Roll/ID as key
   useEffect(() => {
     if (!studentProfile) return;
 
@@ -142,7 +152,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, [studentProfile]);
 
-  // Load Pyodide WASM Engine
   useEffect(() => {
     const loadPyodideEngine = async () => {
       if (window.loadPyodide && !pyodideRef.current) {
@@ -227,6 +236,7 @@ export default function App() {
     const defaultTemplate = selectedLanguage === 'python' ? BLANK_PYTHON_STARTER : BLANK_CPP_STARTER;
     handleCodeChange(defaultTemplate);
     setConsoleOutput('');
+    setSubmissionResult(null);
   };
 
   const handleLanguageChange = (lang) => {
@@ -268,7 +278,7 @@ sys.stdout = io.StringIO()
 
 ${pythonCode}
 
-output_val = sys.stdout.getvalue().strip()
+output_val = sys.stdout.getvalue()
 output_val
 `;
 
@@ -353,6 +363,7 @@ output_val
     }
   };
 
+  // Only allows submission when ALL test cases pass
   const handleSubmit = async () => {
     if (!contestActive) {
       alert("Contest time is up! Submissions are now closed.");
@@ -366,24 +377,45 @@ output_val
     if (selectedLanguage === 'python') {
       for (const tc of activeProblem.testCases) {
         const res = await executePythonCode(currentCode, tc.input);
-        if (res.success && res.output.trim() === tc.expected.trim()) {
+        const actual = normalizeOutput(res.output);
+        const expected = normalizeOutput(tc.expected);
+
+        if (res.success && actual === expected) {
           passed++;
         }
       }
     } else {
       for (const tc of activeProblem.testCases) {
         const out = executeCppSimulation(currentCode, tc.input);
-        if (out.trim() === tc.expected.trim()) {
+        const actual = normalizeOutput(out);
+        const expected = normalizeOutput(tc.expected);
+
+        if (actual === expected) {
           passed++;
         }
       }
     }
 
-    const isAllPassed = passed === total;
-    const status = isAllPassed ? "Accepted" : "Wrong Answer";
-
     setIsExecuting(false);
-    setSubmissionResult({ status, passed, total });
+
+    if (passed < total) {
+      // Block submission and show warning status
+      setSubmissionResult({
+        status: "Failed Test Cases",
+        passed,
+        total,
+        canSubmit: false
+      });
+      return;
+    }
+
+    // All test cases passed - proceed with submission
+    setSubmissionResult({
+      status: "Accepted",
+      passed,
+      total,
+      canSubmit: true
+    });
 
     const newSub = {
       id: `SUB-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -393,8 +425,8 @@ output_val
       problemTitle: activeProblem.title,
       language: selectedLanguage,
       code: currentCode,
-      status: status,
-      score: isAllPassed ? 100 : 0,
+      status: "Accepted",
+      score: 100,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setSubmissions(prev => [newSub, ...prev]);
@@ -624,14 +656,16 @@ output_val
                 </div>
               </div>
 
+              {/* Submission Validation Banner */}
               {submissionResult && (
                 <div className="border-t border-gray-800 px-4 py-2 bg-gray-950 flex justify-between items-center">
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded border ${
-                    submissionResult.status === "Accepted"
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded border flex items-center space-x-1 ${
+                    submissionResult.canSubmit
                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-red-500/10 text-red-400 border-red-500/20"
+                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                   }`}>
-                    Submission: {submissionResult.status}
+                    {!submissionResult.canSubmit && <AlertCircle className="w-3.5 h-3.5 mr-1 text-amber-400" />}
+                    <span>{submissionResult.canSubmit ? "Submitted: Accepted" : "Submission Blocked: Fix Failed Test Cases"}</span>
                   </span>
                   <span className="text-xs text-gray-400 font-mono">
                     Passed {submissionResult.passed}/{submissionResult.total} test cases
@@ -672,9 +706,7 @@ output_val
                       <td className="p-4 text-xs">{sub.problemTitle}</td>
                       <td className="p-4 font-mono text-xs uppercase text-blue-400">{sub.language}</td>
                       <td className="p-4">
-                        <span className={`text-xs px-2 py-0.5 rounded border ${
-                          sub.status === "Accepted" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
-                        }`}>
+                        <span className="text-xs px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                           {sub.status}
                         </span>
                       </td>
